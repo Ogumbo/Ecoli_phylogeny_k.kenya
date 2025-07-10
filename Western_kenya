@@ -1,0 +1,106 @@
+
+✅ Step 1: Concatenate FASTQ files
+
+If you have multiple FASTQ files per isolate (e.g., barcode01_1.fastq, barcode01_2.fastq):
+
+cat barcode01_*.fastq > barcode01_combined.fastq
+
+For gzipped files:
+
+zcat barcode01_*.fastq.gz > barcode01_combined.fastq
+
+✅ Step 2: QC and Filtering with NanoFilt
+
+Example: remove reads <1 kb and Q-score <10.
+
+cat barcode01_combined.fastq | NanoFilt -q 10 -l 1000 > barcode01_filtered.fastq
+
+✅ Step 3: Reference-Based Assembly with Minimap2
+
+Download reference genome (e.g., ecoli_ref.fasta).
+
+Index reference:
+
+minimap2 -d ecoli_ref.mmi ecoli_ref.fasta
+
+Align reads:
+
+minimap2 -ax map-ont ecoli_ref.mmi barcode01_filtered.fastq > barcode01.sam
+
+Convert SAM → sorted BAM:
+
+samtools view -bS barcode01.sam | samtools sort -o barcode01.sorted.bam
+samtools index barcode01.sorted.bam
+
+✅ Step 4: Taxonomic identification with Kraken2
+
+Download Kraken2 standard/minikraken DB and set KRAKEN2_DB to its path.
+
+kraken2 --db $KRAKEN2_DB --threads 8 --report barcode01_kraken_report.txt \
+--output barcode01_kraken_output.txt barcode01_filtered.fastq
+
+✅ Step 5: Genome polishing with Medaka
+
+Medaka needs draft assembly or consensus FASTA.
+Generate draft consensus:
+
+medaka_consensus -i barcode01_filtered.fastq -d ecoli_ref.fasta \
+-o medaka_output -t 8 -m r941_min_high_g303
+
+Output: medaka_output/consensus.fasta
+✅ Step 6: Genome annotation with Prokka
+
+prokka --outdir prokka_out --prefix barcode01 \
+medaka_output/consensus.fasta
+
+Output: prokka_out/barcode01.gff, barcode01.gbk, etc.
+✅ Step 7: MLST typing
+
+mlst medaka_output/consensus.fasta
+
+Output: Sequence type (ST).
+✅ Step 8: AMR detection
+
+ResFinder:
+
+abricate --db resfinder medaka_output/consensus.fasta > barcode01_resfinder.tab
+
+CARD (RGI):
+
+rgi main -i medaka_output/consensus.fasta -o barcode01_rgi --input_type contig
+
+✅ Step 9: Virulence gene detection (VFDB)
+
+abricate --db vfdb medaka_output/consensus.fasta > barcode01_vfdb.tab
+
+✅ Step 10: Plasmid identification
+
+Using PlasmidFinder:
+
+abricate --db plasmidfinder medaka_output/consensus.fasta > barcode01_plasmidfinder.tab
+
+✅ Step 11: Multiple sequence alignment (MSA)
+
+For multiple samples, collect all polished genomes (sample01.fasta, sample02.fasta, ...).
+
+mafft --auto --thread 8 sample01.fasta sample02.fasta sample03.fasta > aligned.fasta
+
+Visualize in:
+
+aliview aligned.fasta
+
+✅ 📦 Summary Table
+Step	Tool	Input	Output
+
+
+Concatenate FASTQ	cat / zcat	Multiple FASTQ	Combined FASTQ
+QC & Filter	NanoFilt	Combined FASTQ	Filtered FASTQ
+Align & Assembly	Minimap2, Samtools	Filtered FASTQ, Reference	BAM/SAM
+Taxonomy	Kraken2	Filtered FASTQ	Report
+Polishing	Medaka	Filtered FASTQ + ref	Polished genome FASTA
+Annotation	Prokka	Polished FASTA	GFF, GBK
+MLST	mlst	Polished FASTA	ST
+AMR detection	Abricate, RGI	Polished FASTA	AMR gene list
+Virulence detection	Abricate	Polished FASTA	Virulence gene list
+Plasmid detection	Abricate	Polished FASTA	Plasmid replicon list
+MSA & visualization	MAFFT, Aliview	Polished FASTAs	Alignment
