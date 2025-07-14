@@ -58,6 +58,19 @@ wget https://genome-idx.s3.amazonaws.com/kraken/k2_minikraken_8GB_202003.tgz
 tar -xvzf k2_minikraken_8GB_202003.tgz
 
 
+
+
+To check your download
+
+ls ~/kraken2_db
+
+You should see files like:
+
+hash.k2d  opts.k2d  taxo.k2d
+
+
+
+
 To run Kraken2*******
 
 kraken2 --db $KRAKEN2_DB --threads 8 --report barcode01_kraken_report.txt \
@@ -67,6 +80,8 @@ kraken2 --db $KRAKEN2_DB --threads 8 --report barcode01_kraken_report.txt \
 or
 
 raken2 --db ~/kraken2_db --threads 4 --report output.report.txt --output output.kraken input.fastq
+
+
 
 
 
