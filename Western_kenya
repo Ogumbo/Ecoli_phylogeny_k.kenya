@@ -27,17 +27,48 @@ Align reads:
 
 minimap2 -ax map-ont ecoli_ref.mmi barcode01_filtered.fastq > barcode01.sam
 
+************For multiple barcode01 to 24 do
+
+for i in $(seq -w 1 24); do minimap2 -ax map-ont ecoli_ref_assembly/ecoli_k12_MG1655.mmi nanofilt_filtered/barcode${i}_filtered.fastq >fly_assembled/barcode${i}.sam; done
+
+
+
 Convert SAM → sorted BAM:
 
 samtools view -bS barcode01.sam | samtools sort -o barcode01.sorted.bam
 samtools index barcode01.sorted.bam
 
+****** for multiple barcodes01 to 24 use:
+
+for i in $(seq -w 1 24); do samtools view -bS fly_assembled/barcode${i}.sam | samtools sort -o fly_assembled/barcode${i}.sorted.bam && samtools index fly_assembled/barcode${i}.sorted.bam; done
+
+
 ✅ Step 4: Taxonomic identification with Kraken2
 
 Download Kraken2 standard/minikraken DB and set KRAKEN2_DB to its path.
 
+
+# Make a directory for your database
+mkdir -p ~/kraken2_db && cd ~/kraken2_db
+
+# Download the MiniKraken2 v2 database (8 GB compressed)
+wget https://genome-idx.s3.amazonaws.com/kraken/k2_minikraken_8GB_202003.tgz
+
+# Extract it
+tar -xvzf k2_minikraken_8GB_202003.tgz
+
+
+To run Kraken2*******
+
 kraken2 --db $KRAKEN2_DB --threads 8 --report barcode01_kraken_report.txt \
 --output barcode01_kraken_output.txt barcode01_filtered.fastq
+
+
+or
+
+raken2 --db ~/kraken2_db --threads 4 --report output.report.txt --output output.kraken input.fastq
+
+
 
 ✅ Step 5: Genome polishing with Medaka
 
