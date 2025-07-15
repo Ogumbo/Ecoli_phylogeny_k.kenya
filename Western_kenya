@@ -93,6 +93,10 @@ Generate draft consensus:
 medaka_consensus -i barcode01_filtered.fastq -d ecoli_ref.fasta \
 -o medaka_output -t 8 -m r941_min_high_g303
 
+
+******* For multiple barcodes run:  or i in $(seq -w 1 24); do   medaka_consensus     -i nanofilt_filtered/barcode${i}_filtered.fastq     -d ecoli_ref_assembly/ecoli_k12_MG1655.fna     -o medaka_output/barcode${i}; done
+
+
 Output: medaka_output/consensus.fasta
 ✅ Step 6: Genome annotation with Prokka
 
