@@ -83,6 +83,47 @@ or
 kraken2 --db ~/kraken2_db --threads 4 --report output.report.txt --output output.kraken input.fastq
 
 
+TO RUN KRAKEN DATABASE
+
+For barcode01
+
+kraken --db ~/kraken_db /media/greatlife1/7494197894193E54/ECOLI_20250319_FASTQs/fastq_pass/medaka_polished/barcode01/consensus.fasta > kraken_output.txt
+
+
+For barcode 11
+
+
+kraken --db ~/kraken_db /media/greatlife1/7494197894193E54/ECOLI_20250319_FASTQs/fastq_pass/medaka_polished/barcode11/consensus.fasta > kraken_output/barcode11_kraken.txt
+
+
+
+*******
+
+***********
+
+To give taxonomic classificatin>>>>>>>>>
+
+For barcode01
+
+grep "^439855" ~/kraken_db/taxonomy/names.dmp
+
+
+FOr bacode 11
+
+grep "^507522" ~/kraken_db/taxonomy/names.dmp
+
+
+
+
+🔍 Breakdown of Fields
+
+Field	Value	Meaning
+
+1	C	Classified (as opposed to U for unclassified)
+2	NC_000913.3	Read/contig ID — in this case, it's likely a reference genome or contig name from a FASTA file (e.g., E. coli K-12 reference)
+3	439855	Taxon ID — the NCBI Taxonomy ID this sequence is classified to
+4	4556757	Length of the sequence (in bases)
+5+	0:25 543:1 0:8 543:1 0:19 543:1 0:180	K-mer mapping list (see explanation below)
 
 
 
